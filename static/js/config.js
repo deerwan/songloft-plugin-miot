@@ -402,8 +402,8 @@ const voiceCommandTypeLabels = {
     'play_song': '播放歌曲',
     'set_play_mode': '播放模式',
     'set_volume': '音量控制',
-    'next_song': '下一首',
-    'prev_song': '上一首',
+    'next': '下一首',
+    'previous': '上一首',
     'stop': '停止播放',
 };
 
@@ -413,8 +413,8 @@ const voiceCommandTypeIcons = {
     'play_song': 'music_note',
     'set_play_mode': 'repeat',
     'set_volume': 'volume_up',
-    'next_song': 'skip_next',
-    'prev_song': 'skip_previous',
+    'next': 'skip_next',
+    'previous': 'skip_previous',
     'stop': 'stop',
 };
 

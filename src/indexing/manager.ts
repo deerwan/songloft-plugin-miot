@@ -406,31 +406,38 @@ export class IndexingManager {
   async findSongByName(songName: string): Promise<SongLocation | null> {
     if (!this.indexReady || !songName) return null;
 
-    // 1. 用内存歌曲索引模糊搜索匹配歌曲
+    // 1. 用内存歌曲索引模糊搜索匹配歌曲（按评分降序）
     const matchedSongs = this.searchSong(songName);
     if (matchedSongs.length === 0) return null;
 
-    // 收集匹配歌曲的 ID 集合，用于快速查找
     const matchedSongIds = new Set(matchedSongs.map(s => s.id));
 
-    // 2. 遍历歌单，按需加载歌曲列表查找位置
+    // 2. 遍历歌单，收集所有匹配歌曲的位置信息
+    const songLocationMap = new Map<number, SongLocation>();
     for (const pl of this.playlists) {
       try {
         const plSongs = (await songloft.playlists.getSongs(pl.id, { limit: 100000 })) ?? [];
         for (let idx = 0; idx < plSongs.length; idx++) {
-          if (matchedSongIds.has(plSongs[idx].id)) {
-            return {
+          const songId = plSongs[idx].id;
+          if (matchedSongIds.has(songId) && !songLocationMap.has(songId)) {
+            songLocationMap.set(songId, {
               playlistId: pl.id,
               playlistName: pl.name,
               songIndex: idx,
               songTitle: plSongs[idx].title ?? '',
               artist: plSongs[idx].artist ?? '',
-            };
+            });
           }
         }
       } catch (e) {
         songloft.log.warn(`findSongByName: 获取歌单歌曲失败 playlist_id=${pl.id}: ${e instanceof Error ? e.message : String(e)}`);
       }
+    }
+
+    // 3. 按搜索评分顺序（最佳匹配优先）返回第一个有位置的歌曲
+    for (const song of matchedSongs) {
+      const loc = songLocationMap.get(song.id);
+      if (loc) return loc;
     }
 
     return null;

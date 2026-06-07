@@ -6,6 +6,7 @@
 import { apiGet, apiPost } from './common.js';
 import { showSnackbar, showLoading, hideLoading, showResult, getAccountId, getDeviceId, formatDuration } from './utils.js';
 import { loadDeviceStatus } from './playback.js';
+import { initPlaylistSearch, initSongSearch } from './search.js';
 
 /**
  * HTML 转义辅助函数
@@ -51,6 +52,13 @@ export function togglePlaylistSelectPanel(trigger) {
     backdrop.style.display = 'block';
     panel.classList.add('show');
     if (arrow) arrow.classList.add('expanded');
+
+    const searchInput = document.getElementById('playlistSearchInput');
+    if (searchInput) {
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input'));
+        setTimeout(() => searchInput.focus(), 100);
+    }
 }
 
 /**
@@ -152,6 +160,8 @@ export function loadPlaylists() {
             });
         }
 
+        initPlaylistSearch();
+
         // 上报歌单加载事件
         if (window.tracely) {
             window.tracely.reportEvent('playlist_load', { playlist_count: data.data.length });
@@ -236,6 +246,8 @@ export function loadPlaylistSongs(playlistId) {
 
             songList.appendChild(item);
         });
+
+        initSongSearch();
 
         // 上报歌单选择事件
         if (window.tracely) {

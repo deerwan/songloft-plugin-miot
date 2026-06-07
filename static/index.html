@@ -36,6 +36,12 @@
             </div>
             <select id="playlistSelect" style="display:none"></select>
 
+            <!-- 歌曲搜索栏 -->
+            <div class="search-bar" id="songSearchBar" style="display:none">
+                <span class="material-symbols-outlined">search</span>
+                <input type="text" id="songSearchInput" placeholder="搜索歌曲..." autocomplete="off">
+            </div>
+
             <!-- 歌曲列表 -->
             <div class="song-list" id="songList">
                 <div class="song-list-empty">请选择歌单</div>
@@ -617,6 +623,10 @@
     <!-- 歌单选择弹出层 -->
     <div id="playlistSelectBackdrop" class="popup-backdrop" style="display:none" onclick="closePlaylistSelectPanel()"></div>
     <div id="playlistSelectPanel" class="popup-panel playlist-select-panel">
+        <div class="search-bar" id="playlistSearchBar">
+            <span class="material-symbols-outlined">search</span>
+            <input type="text" id="playlistSearchInput" placeholder="搜索歌单..." autocomplete="off">
+        </div>
         <div id="playlistSelectList">
             <div class="empty-state" style="padding:24px;font-size:14px">暂无歌单</div>
         </div>

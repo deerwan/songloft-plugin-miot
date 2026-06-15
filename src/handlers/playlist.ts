@@ -180,6 +180,57 @@ export function registerPlaylistHandlers(
     }
   });
 
+  // POST /player/toggle - 切换播放/暂停状态
+  router.post('/player/toggle', async (req: HTTPRequest) => {
+    try {
+      const body = parseBody(req);
+      const query = parseQuery(req.query);
+      const account_id = body.account_id || query.account_id;
+      const device_id = body.device_id || query.device_id;
+
+      if (!account_id || !device_id) {
+        return jsonResponse({ success: false, error: 'account_id and device_id are required' });
+      }
+
+      const manager = await playlistManagerMap.getOrCreate(account_id, device_id);
+
+      if (manager.isPlaying()) {
+        await manager.stop();
+        return jsonResponse({ success: true, data: { message: 'playlist paused', state: 'stopped' } });
+      }
+
+      if (!manager.hasPlaylist()) {
+        return jsonResponse({ success: false, error: 'no playlist loaded, please select a playlist first' });
+      }
+
+      // 检查服务器地址
+      const config = await configManager.getConfig();
+      if (!config.server_host) {
+        return jsonResponse({ success: false, error: '未配置服务器地址，请先在「设置」中配置服务器地址。' });
+      }
+      if (isLoopbackAddress(config.server_host)) {
+        return jsonResponse({ success: false, error: '服务器地址为本地回环地址，MIoT 智能音箱无法访问。请在「设置」中修改为局域网 IP 地址。' });
+      }
+
+      const status = manager.getStatus();
+      const ok = await manager.play(status.playlist_id, status.current_index, status.play_mode as PlayMode);
+      if (!ok) {
+        return jsonResponse({ success: false, error: 'failed to resume playback' });
+      }
+
+      return jsonResponse({
+        success: true,
+        data: {
+          message: 'playlist resumed',
+          state: 'playing',
+          current_song: manager.getCurrentSong(),
+        },
+      });
+    } catch (e: any) {
+      return jsonResponse({ success: false, error: e.message || String(e) });
+    }
+  });
+
   // POST /player/previous - 上一首
   router.post('/player/previous', async (req: HTTPRequest) => {
     try {

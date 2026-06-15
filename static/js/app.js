@@ -299,14 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ========== 播放控制按钮 ==========
     const playBtn = document.getElementById('playBtn');
     if (playBtn) {
-        playBtn.addEventListener('click', () => {
-            const icon = playBtn.querySelector('.material-symbols-outlined');
-            if (icon && icon.textContent === 'pause') {
-                stopPlaylist();
-            } else {
-                playPlaylist();
-            }
-        });
+        playBtn.addEventListener('click', togglePlayPause);
     }
 
     const prevBtn = document.getElementById('prevBtn');

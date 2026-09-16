@@ -897,7 +897,9 @@ async function deleteMemoryRecord(id?: string): Promise<void> {
       <div class="field-grid">
         <div class="field">
           <label class="field-label">模型</label>
-          <div style="display:flex;gap:8px;align-items:flex-start;">
+          <!-- 复用 .inline-fields 而不是手写 display:flex：见 style.css .model-row 注释，
+               WebF 下子项没有显式 flex 尺寸就不会收缩，下拉会把「刷新」挤出本列。 -->
+          <div class="inline-fields model-row">
             <SlSelect
               :model-value="aiModelSelectValue"
               :options="aiModelOptions"
@@ -911,15 +913,16 @@ async function deleteMemoryRecord(id?: string): Promise<void> {
           </div>
           <!-- 自定义模型名：仅在下拉选「自定义模型名…」或当前模型不在列表时展开（部分服务不支持 /v1/models 或列表缺目标模型） -->
           <template v-if="modelCustomActive">
-            <div style="margin-top:8px;">
-              <SlInput
-                :model-value="state.config.ai_config.model || ''"
-                placeholder="手动填写模型名，如 qwen-plus"
-                aria-label="手动填写 AI 模型名"
-                @update:model-value="state.config.ai_config.model = $event"
-                @change="saveConfig({ ai_config: state.config.ai_config })"
-              />
-            </div>
+            <!-- 不套 auto 宽的裸 div：Flutter 系输入框是 RenderWidget，包一层会被 WebF
+                 量到视口宽（SlButton.vue 顶部注释同源），间距用自身 margin-top。 -->
+            <SlInput
+              class="model-custom-input"
+              :model-value="state.config.ai_config.model || ''"
+              placeholder="手动填写模型名，如 qwen-plus"
+              aria-label="手动填写 AI 模型名"
+              @update:model-value="state.config.ai_config.model = $event"
+              @change="saveConfig({ ai_config: state.config.ai_config })"
+            />
             <div class="field-help">若接口不支持 /v1/models 或列表没有目标模型，可直接填写模型名。</div>
           </template>
         </div>
